@@ -127,6 +127,7 @@ public class OAuth2CodeParser {
         // Finally doublecheck if code is not expired
         int currentTime = Time.currentTime();
         if (currentTime > result.codeData.getExpiration()) {
+            logger.warnf("Code '%s' is expired for userSession '%s' and client '%s'.", codeUUID, userSessionId, clientUUID);
             return result.expiredCode();
         }
 

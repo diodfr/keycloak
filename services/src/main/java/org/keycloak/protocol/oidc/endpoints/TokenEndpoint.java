@@ -277,6 +277,7 @@ public class TokenEndpoint {
         String code = formParams.getFirst(OAuth2Constants.CODE);
         if (code == null) {
             event.error(Errors.INVALID_CODE);
+            logger.warnf("Code not valid (empty code)");
             throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_REQUEST, "Missing parameter: " + OAuth2Constants.CODE, Response.Status.BAD_REQUEST);
         }
 
@@ -290,7 +291,9 @@ public class TokenEndpoint {
             }
 
             event.error(Errors.INVALID_CODE);
-
+            
+            logger.warnf("Code not valid (illegal code)");
+            
             throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_GRANT, "Code not valid", Response.Status.BAD_REQUEST);
         }
 
@@ -338,11 +341,17 @@ public class TokenEndpoint {
 
         if (redirectUri != null && !redirectUri.equals(redirectUriParam)) {
             event.error(Errors.INVALID_CODE);
+            if (redirectUri == null) {
+                logger.warnf("Code not valid (empty redirect uri)");
+            } else {
+                logger.warnf("Code not valid (redirect uri : %s != redirect uri Param : %s)", redirectUri, redirectUriParam);
+            }
             throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_GRANT, "Incorrect redirect_uri", Response.Status.BAD_REQUEST);
         }
 
         if (!client.getClientId().equals(clientSession.getClient().getClientId())) {
             event.error(Errors.INVALID_CODE);
+            logger.warnf("Code not valid (client code : %s != client code session : %s)", client.getClientId(), clientSession.getClient().getClientId());
             throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_GRANT, "Auth error", Response.Status.BAD_REQUEST);
         }
 
